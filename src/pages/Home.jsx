@@ -1,47 +1,59 @@
-import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import React, { useEffect, useState } from "react";
 import Layout from "./Layout";
+import { fetchCoinMarkets } from "../services/coinGeckoServices";
 import { Link } from "react-router-dom";
-
-// Register the components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Home = () => {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const perPage = 10;
 
   useEffect(() => {
-    axios
-      .get("/api/api/v3/coins/markets?vs_currency=usd&per_page=10", {
-        headers: {
-          "x-cg-demo-api-key": process.env.REACT_APP_GECKO_API_KEY,
-        },
-      })
-      .then((response) => {
-        setData(response.data);
-        console.log(response.data);
-      })
-      .catch((error) => {
+    const getData = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchCoinMarkets("usd", perPage, currentPage);
+        setData(data);
+        setTotalPages(Math.ceil(100 / perPage)); // Assuming there are 100 items in total
+        console.log(data);
+      } catch (error) {
         console.log(error);
         setError(error);
-      });
-  }, []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getData();
+  }, [currentPage]);
+
+  const handleNextPage = async () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = async () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-red-500">Error: {error.message}</div>;
+  }
+
+  if (!data.length) {
+    return <div className="text-center">No data available</div>;
+  }
 
   return (
     <Layout>
@@ -83,6 +95,25 @@ const Home = () => {
               </Link>
             );
           })}
+      </div>
+      <div className="flex justify-center items-center mt-4">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded mr-2 disabled:bg-gray-400"
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span className="mx-2">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded ml-2 disabled:bg-gray-400"
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
       </div>
     </Layout>
   );
