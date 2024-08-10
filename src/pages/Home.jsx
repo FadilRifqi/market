@@ -1,46 +1,94 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Layout from "./Layout";
-import { fetchCoinMarkets } from "../services/coinGeckoServices";
-import { Link } from "react-router-dom";
+import {
+  fetchCoinMarkets,
+  fetchCoinQuery,
+} from "../services/coinGeckoServices";
 import LoadingSpinner from "../components/LoadingSpinner";
+import SearchInput from "../components/Home/SearchInput.jsx";
+import CryptoContainer from "../components/Home/CryptoContainer.jsx";
 
 const Home = () => {
+  const inputRef = useRef(null);
   const [data, setData] = useState([]);
+  const [ids, setIds] = useState("");
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(
+    Number(localStorage.getItem("currentPage")) || 1
+  );
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
+
   const perPage = 10;
 
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchCoinMarkets("usd", perPage, currentPage, ids);
+      setData(data);
+      setTotalPages(Math.ceil(1000 / perPage)); // Assuming there are 1000 items in total
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, ids]);
+
   useEffect(() => {
-    const getData = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchCoinMarkets("usd", perPage, currentPage);
-        setData(data);
-        setTotalPages(Math.ceil(100 / perPage)); // Assuming there are 100 items in total
-        console.log(data);
-      } catch (error) {
-        console.log(error);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const savedPage = localStorage.getItem("currentPage");
+    if (savedPage) {
+      setCurrentPage(Number(savedPage));
+    }
+  }, []);
 
-    getData();
-  }, [currentPage]);
+  useEffect(() => {
+    fetchData();
+    localStorage.setItem("currentPage", currentPage);
+  }, [currentPage, ids, fetchData]);
 
-  const handleNextPage = async () => {
+  const handleNextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+      setCurrentPage((prevPage) => prevPage + 1);
     }
   };
 
-  const handlePreviousPage = async () => {
+  const handlePreviousPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage((prevPage) => prevPage - 1);
     }
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const searchHandler = async () => {
+    try {
+      const data = await fetchCoinQuery(searchQuery);
+      if (data) {
+        const newIds = data.coins.slice().map((coin) => coin.id); // Take first 10 coin ids
+        setIds(newIds.join(",")); // Overwrite previous ids with new ids
+      }
+    } catch (error) {
+      console.error("Error searching coins:", error);
+      setError(error);
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      searchHandler();
+    }
+  };
+
+  const handleIconClick = () => {
+    setShowSearch(true);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   if (loading) {
@@ -57,63 +105,23 @@ const Home = () => {
 
   return (
     <Layout>
-      {error && <p>There was an error: {error.message}</p>}
-      <div className="crypto-container">
-        {data &&
-          data.map((coin, index) => {
-            return (
-              <Link to={`/coin/${coin.id}`} className="coin-card" key={index}>
-                <div className="coin-header">
-                  <img
-                    src={coin.image}
-                    alt={coin.name}
-                    className="coin-image"
-                  />
-                  <h1 className="coin-name">{coin.name}</h1>
-                  <h2 className="coin-symbol">{coin.symbol.toUpperCase()}</h2>
-                </div>
-                <div className="coin-details">
-                  <p className="coin-price">
-                    Price: ${coin.current_price.toFixed(2)}
-                  </p>
-                  <p className="coin-market-cap">
-                    Market Cap: ${coin.market_cap.toLocaleString()}
-                  </p>
-                  <p className="coin-volume">
-                    Volume: ${coin.total_volume.toLocaleString()}
-                  </p>
-                  <p
-                    className={`coin-change ${
-                      coin.price_change_percentage_24h >= 0
-                        ? "positive"
-                        : "negative"
-                    }`}
-                  >
-                    24h Change: {coin.price_change_percentage_24h.toFixed(2)}%
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
-      </div>
-      <div className="flex justify-center items-center mt-4">
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded mr-2 disabled:bg-gray-400"
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span className="mx-2">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded ml-2 disabled:bg-gray-400"
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+      <div className="relative">
+        <SearchInput
+          showSearch={showSearch}
+          searchQuery={searchQuery}
+          handleSearchChange={handleSearchChange}
+          handleKeyDown={handleKeyDown}
+          handleIconClick={handleIconClick}
+          setShowSearch={setShowSearch}
+        />
+        <CryptoContainer
+          data={data}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          handlePreviousPage={handlePreviousPage}
+          handleNextPage={handleNextPage}
+          setCurrentPage={setCurrentPage}
+        />
       </div>
     </Layout>
   );
