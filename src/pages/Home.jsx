@@ -16,7 +16,7 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(
     Number(localStorage.getItem("currentPage")) || 1
   );
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(100);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -28,7 +28,6 @@ const Home = () => {
     try {
       const data = await fetchCoinMarkets("usd", perPage, currentPage, ids);
       setData(data);
-      setTotalPages(Math.ceil(1000 / perPage)); // Assuming there are 1000 items in total
     } catch (error) {
       console.error("Error fetching data:", error);
       setError(error);
@@ -71,6 +70,7 @@ const Home = () => {
       if (data) {
         const newIds = data.coins.slice().map((coin) => coin.id); // Take first 10 coin ids
         setIds(newIds.join(",")); // Overwrite previous ids with new ids
+        setTotalPages(Math.ceil(data.coins.length / perPage));
       }
     } catch (error) {
       console.error("Error searching coins:", error);
