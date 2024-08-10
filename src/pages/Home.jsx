@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Bar } from "react-chartjs-2";
 import axios from "axios";
 import {
   Chart as ChartJS,
@@ -11,6 +10,7 @@ import {
   Legend,
 } from "chart.js";
 import Layout from "./Layout";
+import { Link } from "react-router-dom";
 
 // Register the components
 ChartJS.register(
@@ -45,11 +45,12 @@ const Home = () => {
 
   return (
     <Layout>
+      {error && <p>There was an error: {error.message}</p>}
       <div className="crypto-container">
         {data &&
           data.map((coin, index) => {
             return (
-              <div className="coin-card" key={index}>
+              <Link to={`/coin/${coin.id}`} className="coin-card" key={index}>
                 <div className="coin-header">
                   <img
                     src={coin.image}
@@ -79,7 +80,7 @@ const Home = () => {
                     24h Change: {coin.price_change_percentage_24h.toFixed(2)}%
                   </p>
                 </div>
-              </div>
+              </Link>
             );
           })}
       </div>

@@ -3,9 +3,9 @@ import SidebarReact from "../components/SidebarReact";
 
 function Layout({ children }) {
   return (
-    <div>
+    <div className="flex">
       <SidebarReact />
-      {children}
+      <div className="flex-1 p-4">{children}</div>
     </div>
   );
 }
