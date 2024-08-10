@@ -2,12 +2,14 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "./Layout";
+import Chart from 'react-apexcharts';
 
 function Coin() {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [ohlcSeries, setOhlcSeries] = useState([{ name: 'OHLC', data: [] }]);
 
   useEffect(() => {
     axios
@@ -24,6 +26,32 @@ function Coin() {
         console.log(error);
         setError(error);
       });
+
+    const fetchOhlcData = async () => {
+      try {
+        const response = await axios.get(`/api/api/v3/coins/${id}/ohlc`, {
+          params: {
+            vs_currency: 'usd',
+            days: '180' // Data historis 6 bulan (180 hari)
+          },
+          headers: {
+            "x-cg-demo-api-key": process.env.REACT_APP_GECKO_API_KEY,
+          },
+        });
+
+        const ohlcData = response.data.map((ohlc) => ({
+          x: new Date(ohlc[0]),
+          y: [ohlc[1], ohlc[2], ohlc[3], ohlc[4]] // [Open, High, Low, Close]
+        }));
+
+        setOhlcSeries([{ name: 'OHLC', data: ohlcData }]);
+      } catch (error) {
+        console.error('API Error:', error); // Log error API
+        setError(error);
+      }
+    };
+
+    fetchOhlcData();
   }, [id]);
 
   if (error) {
@@ -33,6 +61,76 @@ function Coin() {
   if (!data) {
     return <div className="text-center">Loading...</div>;
   }
+
+  const options = {
+    chart: {
+      height: 350,
+      type: 'candlestick',
+      animations: {
+        enabled: true,
+        easing: 'linear',
+        dynamicAnimation: {
+          speed: 1000
+        }
+      },
+      toolbar: {
+        show: true,
+        tools: {
+          zoomin: true,
+          zoomout: true,
+          pan: false,
+          reset: true
+        }
+      },
+      zoom: {
+        enabled: true,
+        type: 'x',
+        autoScaleYaxis: true
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      curve: 'straight',
+      width: 1
+    },
+    grid: {
+      borderColor: "#40475D",
+    },
+    xaxis: {
+      type: 'datetime',
+      axisTicks: {
+        color: '#333'
+      },
+      axisBorder: {
+        color: "#333"
+      }
+    },
+    yaxis: {
+      decimalsInFloat: 2,
+      opposite: true,
+      labels: {
+        offsetX: -10
+      }
+    },
+    tooltip: {
+      theme: 'dark',
+      x: {
+        formatter: function (val) {
+          return new Date(val).toLocaleDateString();
+        }
+      }
+    },
+    colors: ['#FCCF31'],
+    fill: {
+      type: 'gradient',
+      gradient: {
+        gradientToColors: ['#F55555'],
+        stops: [0, 100]
+      }
+    }
+  };
 
   return (
     <Layout>
@@ -99,6 +197,15 @@ function Coin() {
                 </p>
               </div>
             </div>
+          </div>
+          {/* Candle Stick Chart */}
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-2">Candlestick Chart</h2>
+            {ohlcSeries[0].data.length > 0 ? (
+              <Chart options={options} series={ohlcSeries} type="candlestick" height={350} />
+            ) : (
+              <p>Loading Candlestick Chart...</p>
+            )}
           </div>
         </div>
       </div>
