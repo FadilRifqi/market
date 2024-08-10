@@ -91,12 +91,6 @@ function Coin() {
       },
       toolbar: {
         show: true,
-        tools: {
-          zoomin: true,
-          zoomout: true,
-          pan: false,
-          reset: true,
-        },
       },
       zoom: {
         enabled: true,
