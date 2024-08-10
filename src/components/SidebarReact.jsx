@@ -1,51 +1,41 @@
-"use client";
-
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { CiBitcoin } from "react-icons/ci";
+import { HiMenu } from "react-icons/hi";
 import { Sidebar } from "flowbite-react";
-import {
-  HiArrowSmRight,
-  HiChartPie,
-  HiInbox,
-  HiShoppingBag,
-  HiTable,
-  HiUser,
-} from "react-icons/hi";
 
 const SidebarReact = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="min-h-screen flex">
-      <Sidebar
-        aria-label="Sidebar with multi-level dropdown example"
-        className="h-full"
+    <div className="min-h-screen flex relative">
+      <button
+        className={`p-2 text-gray-500 focus:outline-none ${
+          isSidebarOpen ? "absolute top-4 right-10" : "absolute top-4 left-4"
+        }`}
+        onClick={toggleSidebar}
       >
-        <Sidebar.Items className="h-full flex flex-col">
-          <Sidebar.ItemGroup className="flex-1">
-            <Sidebar.Item href="#" icon={HiChartPie}>
-              Dashboard
-            </Sidebar.Item>
-            <Sidebar.Collapse icon={HiShoppingBag} label="E-commerce">
-              <Sidebar.Item href="#">Products</Sidebar.Item>
-              <Sidebar.Item href="#">Sales</Sidebar.Item>
-              <Sidebar.Item href="#">Refunds</Sidebar.Item>
-              <Sidebar.Item href="#">Shipping</Sidebar.Item>
-            </Sidebar.Collapse>
-            <Sidebar.Item href="#" icon={HiInbox}>
-              Inbox
-            </Sidebar.Item>
-            <Sidebar.Item href="#" icon={HiUser}>
-              Users
-            </Sidebar.Item>
-            <Sidebar.Item href="#" icon={HiShoppingBag}>
-              Products
-            </Sidebar.Item>
-            <Sidebar.Item href="#" icon={HiArrowSmRight}>
-              Sign In
-            </Sidebar.Item>
-            <Sidebar.Item href="#" icon={HiTable}>
-              Sign Up
-            </Sidebar.Item>
-          </Sidebar.ItemGroup>
-        </Sidebar.Items>
-      </Sidebar>
+        <HiMenu className="w-6 h-6" />
+      </button>
+      {isSidebarOpen && (
+        <Sidebar
+          aria-label="Sidebar with multi-level dropdown example"
+          className="h-full"
+        >
+          <Sidebar.Items className="h-full flex flex-col">
+            <Sidebar.ItemGroup className="flex-1">
+              <Link to={"/"}>
+                <Sidebar.Item icon={CiBitcoin}>Coin</Sidebar.Item>
+              </Link>
+            </Sidebar.ItemGroup>
+          </Sidebar.Items>
+        </Sidebar>
+      )}
+      <div className="flex-1 p-4">{/* Main content goes here */}</div>
     </div>
   );
 };

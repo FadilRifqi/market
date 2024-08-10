@@ -1,15 +1,31 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import parse, { domToReact } from "html-react-parser";
 import { useParams } from "react-router-dom";
 import Layout from "./Layout";
-import Chart from 'react-apexcharts';
+import Chart from "react-apexcharts";
+import LoadingSpinner from "../components/LoadingSpinner";
+
+const customParser = (htmlString) => {
+  const options = {
+    replace: (domNode) => {
+      if (domNode.name === "a") {
+        return (
+          <a href={domNode.attribs.href} style={{ color: "blue" }}>
+            {domToReact(domNode.children)}
+          </a>
+        );
+      }
+    },
+  };
+  return parse(htmlString, options);
+};
 
 function Coin() {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const [ohlcSeries, setOhlcSeries] = useState([{ name: 'OHLC', data: [] }]);
+  const [ohlcSeries, setOhlcSeries] = useState([{ name: "OHLC", data: [] }]);
 
   useEffect(() => {
     axios
@@ -31,8 +47,8 @@ function Coin() {
       try {
         const response = await axios.get(`/api/api/v3/coins/${id}/ohlc`, {
           params: {
-            vs_currency: 'usd',
-            days: '180' // Data historis 6 bulan (180 hari)
+            vs_currency: "usd",
+            days: "180", // Data historis 6 bulan (180 hari)
           },
           headers: {
             "x-cg-demo-api-key": process.env.REACT_APP_GECKO_API_KEY,
@@ -41,12 +57,12 @@ function Coin() {
 
         const ohlcData = response.data.map((ohlc) => ({
           x: new Date(ohlc[0]),
-          y: [ohlc[1], ohlc[2], ohlc[3], ohlc[4]] // [Open, High, Low, Close]
+          y: [ohlc[1], ohlc[2], ohlc[3], ohlc[4]], // [Open, High, Low, Close]
         }));
 
-        setOhlcSeries([{ name: 'OHLC', data: ohlcData }]);
+        setOhlcSeries([{ name: "OHLC", data: ohlcData }]);
       } catch (error) {
-        console.error('API Error:', error); // Log error API
+        console.error("API Error:", error); // Log error API
         setError(error);
       }
     };
@@ -59,19 +75,19 @@ function Coin() {
   }
 
   if (!data) {
-    return <div className="text-center">Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   const options = {
     chart: {
       height: 350,
-      type: 'candlestick',
+      type: "candlestick",
       animations: {
         enabled: true,
-        easing: 'linear',
+        easing: "linear",
         dynamicAnimation: {
-          speed: 1000
-        }
+          speed: 1000,
+        },
       },
       toolbar: {
         show: true,
@@ -79,64 +95,64 @@ function Coin() {
           zoomin: true,
           zoomout: true,
           pan: false,
-          reset: true
-        }
+          reset: true,
+        },
       },
       zoom: {
         enabled: true,
-        type: 'x',
-        autoScaleYaxis: true
-      }
+        type: "x",
+        autoScaleYaxis: true,
+      },
     },
     dataLabels: {
-      enabled: false
+      enabled: false,
     },
     stroke: {
-      curve: 'straight',
-      width: 1
+      curve: "straight",
+      width: 1,
     },
     grid: {
       borderColor: "#40475D",
     },
     xaxis: {
-      type: 'datetime',
+      type: "datetime",
       axisTicks: {
-        color: '#333'
+        color: "#333",
       },
       axisBorder: {
-        color: "#333"
-      }
+        color: "#333",
+      },
     },
     yaxis: {
       decimalsInFloat: 2,
       opposite: true,
       labels: {
-        offsetX: -10
-      }
+        offsetX: -10,
+      },
     },
     tooltip: {
-      theme: 'dark',
+      theme: "dark",
       x: {
         formatter: function (val) {
           return new Date(val).toLocaleDateString();
-        }
-      }
+        },
+      },
     },
-    colors: ['#FCCF31'],
+    colors: ["#FCCF31"],
     fill: {
-      type: 'gradient',
+      type: "gradient",
       gradient: {
-        gradientToColors: ['#F55555'],
-        stops: [0, 100]
-      }
-    }
+        gradientToColors: ["#F55555"],
+        stops: [0, 100],
+      },
+    },
   };
 
   return (
     <Layout>
       <div className="container mx-auto p-4">
         <div className="bg-white shadow-md rounded-lg p-6 min-h-screen">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center mb-6 ">
             <img
               src={data.image.large}
               alt={data.name}
@@ -150,7 +166,7 @@ function Coin() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h2 className="text-2xl font-semibold mb-2">Market Data</h2>
-              <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="bg-gray-100 p-4 rounded-lg h-40">
                 <p className="mb-2">
                   <span className="font-semibold">Current Price:</span> $
                   {data.market_data.current_price.usd}
@@ -171,29 +187,9 @@ function Coin() {
             </div>
             <div>
               <h2 className="text-2xl font-semibold mb-2">Description</h2>
-              <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="bg-gray-100 p-4 h-40 rounded-lg overflow-y-auto">
                 <p className="text-justify">
-                  {showFullDescription ? (
-                    <>
-                      {data.description.en}
-                      <button
-                        onClick={() => setShowFullDescription(false)}
-                        className="text-blue-500 ml-2"
-                      >
-                        Show Less
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {data.description.en.substring(0, 300)}...
-                      <button
-                        onClick={() => setShowFullDescription(true)}
-                        className="text-blue-500 ml-2"
-                      >
-                        Read More
-                      </button>
-                    </>
-                  )}
+                  {customParser(data.description.en)}
                 </p>
               </div>
             </div>
@@ -202,7 +198,12 @@ function Coin() {
           <div className="mt-8">
             <h2 className="text-2xl font-semibold mb-2">Candlestick Chart</h2>
             {ohlcSeries[0].data.length > 0 ? (
-              <Chart options={options} series={ohlcSeries} type="candlestick" height={350} />
+              <Chart
+                options={options}
+                series={ohlcSeries}
+                type="candlestick"
+                height={350}
+              />
             ) : (
               <p>Loading Candlestick Chart...</p>
             )}
