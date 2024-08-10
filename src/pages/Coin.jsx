@@ -1,12 +1,13 @@
 import axios from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "./Layout";
 
 function Coin() {
   const { id } = useParams();
-  const [data, setData] = React.useState(null);
-  const [error, setError] = React.useState(null);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
     axios
@@ -36,7 +37,7 @@ function Coin() {
   return (
     <Layout>
       <div className="container mx-auto p-4">
-        <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="bg-white shadow-md rounded-lg p-6 min-h-screen">
           <div className="flex items-center mb-6">
             <img
               src={data.image.large}
@@ -74,16 +75,26 @@ function Coin() {
               <h2 className="text-2xl font-semibold mb-2">Description</h2>
               <div className="bg-gray-100 p-4 rounded-lg">
                 <p className="text-justify">
-                  {data.description.en.length > 300 ? (
+                  {showFullDescription ? (
                     <>
-                      {data.description.en.substring(0, 300)}...
-                      <a href="#" className="text-blue-500">
-                        {" "}
-                        Read More
-                      </a>
+                      {data.description.en}
+                      <button
+                        onClick={() => setShowFullDescription(false)}
+                        className="text-blue-500 ml-2"
+                      >
+                        Show Less
+                      </button>
                     </>
                   ) : (
-                    data.description.en
+                    <>
+                      {data.description.en.substring(0, 300)}...
+                      <button
+                        onClick={() => setShowFullDescription(true)}
+                        className="text-blue-500 ml-2"
+                      >
+                        Read More
+                      </button>
+                    </>
                   )}
                 </p>
               </div>
