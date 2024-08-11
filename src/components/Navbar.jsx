@@ -24,7 +24,7 @@ const NavbarReact = () => {
       <Navbar.Brand href="https://flowbite-react.com">
         <img src="/favicon.ico" className="mr-3 h-6 sm:h-9" alt="Logo" />
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-          Flowbite React
+          Koin Gacor
         </span>
       </Navbar.Brand>
       <div className="flex md:order-2">
@@ -56,8 +56,15 @@ const NavbarReact = () => {
         <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
-        <Link to={"/"}>
-          <Navbar.Link active={location.pathname === "/"}>Home</Navbar.Link>
+        <Link to="/">
+          <Navbar.Link
+            active={
+              location.pathname === "/" ||
+              location.pathname.startsWith("/coin/")
+            }
+          >
+            Coins
+          </Navbar.Link>
         </Link>
         <Link to={"/about"}>
           <Navbar.Link active={location.pathname === "/about"}>

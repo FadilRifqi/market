@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_KEY = process.env.REACT_APP_GECKO_API_KEY;
-const BASE_URL = "/api/api/v3";
+const BASE_URL = "https://api.coingecko.com/api/v3";
 
 export const fetchCoinMarkets = async (
   vsCurrency = "usd",

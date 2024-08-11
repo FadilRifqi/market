@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "./Layout";
+import { useNavigate } from "react-router-dom";
 
 function Settings() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [username, setUsername] = useState(null);
   const profilePictureInputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedUsername = localStorage.getItem("username");
@@ -31,6 +33,7 @@ function Settings() {
 
   const handleCancel = () => {
     setSelectedImage(null);
+    setUsername("");
     if (profilePictureInputRef.current) {
       profilePictureInputRef.current.value = "";
     }
@@ -113,8 +116,15 @@ function Settings() {
               </button>
               <button
                 type="button"
-                className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                 onClick={handleCancel}
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                onClick={() => navigate(-1)}
               >
                 Cancel
               </button>

@@ -29,7 +29,7 @@ function Coin() {
 
   useEffect(() => {
     axios
-      .get(`/api/api/v3/coins/${id}`, {
+      .get(`https://api.coingecko.com/api/v3/coins/${id}`, {
         headers: {
           "x-cg-demo-api-key": process.env.REACT_APP_GECKO_API_KEY,
         },
@@ -45,15 +45,18 @@ function Coin() {
 
     const fetchOhlcData = async () => {
       try {
-        const response = await axios.get(`/api/api/v3/coins/${id}/ohlc`, {
-          params: {
-            vs_currency: "usd",
-            days: "180", // Data historis 6 bulan (180 hari)
-          },
-          headers: {
-            "x-cg-demo-api-key": process.env.REACT_APP_GECKO_API_KEY,
-          },
-        });
+        const response = await axios.get(
+          `https://api.coingecko.com/api/v3/coins/${id}/ohlc`,
+          {
+            params: {
+              vs_currency: "usd",
+              days: "180", // Data historis 6 bulan (180 hari)
+            },
+            headers: {
+              "x-cg-demo-api-key": process.env.REACT_APP_GECKO_API_KEY,
+            },
+          }
+        );
 
         const ohlcData = response.data.map((ohlc) => ({
           x: new Date(ohlc[0]),
