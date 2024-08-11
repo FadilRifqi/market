@@ -70,6 +70,10 @@ const Home = () => {
       if (data) {
         const newIds = data.coins.slice().map((coin) => coin.id); // Take first 10 coin ids
         setIds(newIds.join(",")); // Overwrite previous ids with new ids
+        if (data.coins.length <= 1) {
+          setTotalPages(100);
+          return;
+        }
         setTotalPages(Math.ceil(data.coins.length / perPage));
       }
     } catch (error) {

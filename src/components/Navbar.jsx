@@ -1,9 +1,24 @@
 "use client";
 
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 const NavbarReact = () => {
+  const location = useLocation();
+  const [username, setUsername] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("username");
+    if (savedUsername) {
+      setUsername(savedUsername);
+    }
+    const savedProfilePicture = localStorage.getItem("profilePicture");
+    if (savedProfilePicture) {
+      setSelectedImage(savedProfilePicture);
+    }
+  }, []);
   return (
     <Navbar fluid rounded>
       <Navbar.Brand href="https://flowbite-react.com">
@@ -19,33 +34,51 @@ const NavbarReact = () => {
           label={
             <Avatar
               alt="User settings"
-              img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+              img={selectedImage || "/favicon.ico"}
               rounded
             />
           }
         >
           <Dropdown.Header>
-            <span className="block text-sm">Bonnie Green</span>
-            <span className="block truncate text-sm font-medium">
-              name@flowbite.com
+            <span className="block text-sm">
+              {username ? username : "Bitcoin"}
             </span>
           </Dropdown.Header>
-          <Dropdown.Item>Dashboard</Dropdown.Item>
-          <Dropdown.Item>Settings</Dropdown.Item>
-          <Dropdown.Item>Earnings</Dropdown.Item>
-          <Dropdown.Divider />
-          <Dropdown.Item>Sign out</Dropdown.Item>
+          <Link to={"/"}>
+            <Dropdown.Item>Coins</Dropdown.Item>
+          </Link>
+          <Link to={"/settings"}>
+            <Dropdown.Item>Settings</Dropdown.Item>
+          </Link>
+          {/* <Dropdown.Divider />
+          <Dropdown.Item>Sign out</Dropdown.Item> */}
         </Dropdown>
         <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
         <Link to={"/"}>
-          <Navbar.Link active>Home</Navbar.Link>
+          <Navbar.Link active={location.pathname === "/"}>Home</Navbar.Link>
         </Link>
-        <Navbar.Link href="#">About</Navbar.Link>
-        <Navbar.Link href="#">Services</Navbar.Link>
-        <Navbar.Link href="#">Pricing</Navbar.Link>
-        <Navbar.Link href="#">Contact</Navbar.Link>
+        <Link to={"/about"}>
+          <Navbar.Link active={location.pathname === "/about"}>
+            About
+          </Navbar.Link>
+        </Link>
+        <Link to={"/services"}>
+          <Navbar.Link active={location.pathname === "/services"}>
+            Services
+          </Navbar.Link>
+        </Link>
+        <Link to={"/pricing"}>
+          <Navbar.Link active={location.pathname === "/pricing"}>
+            Pricing
+          </Navbar.Link>
+        </Link>
+        <Link to={"/contact"}>
+          <Navbar.Link active={location.pathname === "/contact"}>
+            Contact
+          </Navbar.Link>
+        </Link>
       </Navbar.Collapse>
     </Navbar>
   );
