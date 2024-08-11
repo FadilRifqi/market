@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Layout from "./Layout";
+import { Helmet } from "react-helmet";
 import {
   fetchCoinMarkets,
   fetchCoinQuery,
@@ -109,6 +110,9 @@ const Home = () => {
 
   return (
     <Layout>
+      <Helmet>
+        <title>Crypto | Coins</title>
+      </Helmet>
       <div className="relative">
         <SearchInput
           showSearch={showSearch}

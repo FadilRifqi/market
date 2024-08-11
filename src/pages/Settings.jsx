@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "./Layout";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 function Settings() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -60,6 +61,9 @@ function Settings() {
 
   return (
     <Layout>
+      <Helmet>
+        <title>Crypto | Settings</title>
+      </Helmet>
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="w-full max-w-lg p-8 bg-white rounded-lg shadow-lg">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">

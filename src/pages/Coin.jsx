@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import Layout from "./Layout";
 import Chart from "react-apexcharts";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { Helmet } from "react-helmet";
 
 const customParser = (htmlString) => {
   const options = {
@@ -147,6 +148,9 @@ function Coin() {
 
   return (
     <Layout>
+      <Helmet>
+        <title>Crypto | {data.name}</title>
+      </Helmet>
       <div className="container mx-auto p-4">
         <div className="bg-white shadow-md rounded-lg p-6 min-h-screen">
           <div className="flex items-center mb-6 ">
